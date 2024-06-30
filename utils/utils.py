@@ -85,7 +85,7 @@ def choice_menu():
               '2. Вывести список вакансий из БД.\n'
               '3. Получить список компаний и количество вакансий у каждой.\n'
               '4. Получить среднюю оплату по вакансиям в БД.\n'
-              '5. Список вакансия в оплатой выше средней.\n'
+              '5. Список вакансий с оплатой выше средней.\n'
               '6. Фильтр вакансий по ключевому слову.\n'
               '7. Удалить вакансию из БД по ID.\n'
               '8. Завершить работу.')
@@ -99,19 +99,25 @@ def choice_menu():
             create_database('data_kurs')
             create_tables('data_kurs')
             insert_data_in_tables('data_kurs')
+            print(f'База успешно обновлена!')
         if int(number) == 2:
             output_vacancies_for_user(db.get_all_vacancies())
+            print(f'Найдено {len(db.get_all_vacancies())} вакансий.')
         if int(number) == 3:
             for i in db.get_companies_and_vacancies_count():
                 print(f'Компания: {i[0]}\n'
                       f'Количество вакансий: {i[1]}\n')
+            print(f'Найдено {len(db.get_companies_and_vacancies_count())} компаний.')
         if int(number) == 4:
             print(f'Средняя заработная плата по выборке: {db.get_avg_salary()}')
         if int(number) == 5:
-            print(db.get_vacancies_with_higher_salary())
+            print(output_vacancies_for_user(db.get_vacancies_with_higher_salary()))
+            print(f'Найдено {len(db.get_vacancies_with_higher_salary())} вакансий.')
         if int(number) == 6:
-            output_vacancies_for_user(
-                db.get_vacancies_with_keyword(input('Введите ключевые слова (можно несколько, через запятую): ')))
+            filter_vac = db.get_vacancies_with_keyword(
+                input('Введите ключевые слова (можно несколько, через запятую): '))
+            output_vacancies_for_user(filter_vac)
+            print(f'Найдено {len(filter_vac)} вакансий.')
         if int(number) == 7:
             id_list = input('Введите ID вакансии для удаления из базы: ')
             db.delete_vacancies(id_list)

@@ -4,12 +4,21 @@ import requests
 class HHParser:
     """ Класс для работы с HeadHunter. """
     @staticmethod
-    def __get_request(keyword) -> list[dict]:
-        """ Получение списка работодателей по ключевому слову. """
-        params = {'text': keyword, 'per_page': 10, 'sort_by': 'by_vacancies_open', 'only_with_vacancies': True}
-        response = requests.get("https://api.hh.ru/employers", params=params)
-        if response.status_code == 200:
-            return response.json()['items']
+    def __get_request(keywords) -> list[dict]:
+        """ Получение списка работодателей по ключевым словам или топ. """
+        keyword = keywords.replace(' ', '').lower().split(',')
+        list_list_vac = []
+        for i in keyword:
+            params = {'text': i, 'per_page': 10, 'sort_by': 'by_vacancies_open', 'only_with_vacancies': True}
+            response = requests.get("https://api.hh.ru/employers", params=params)
+            if response.status_code == 200:
+                list_list_vac.append(response.json()['items'])
+        list_vac = []
+        for v in list_list_vac:
+            for vac in v:
+                if vac not in list_vac:
+                    list_vac.append(vac)
+        return list_vac
 
     def get_employers(self, keyword=None) -> list[dict]:
         """ Формирование списка работодателей для удобства. """
@@ -56,4 +65,4 @@ class HHParser:
 if __name__ == '__main__':
     hh = HHParser()
     # print(hh.get_all_vacancies())  # Вывод всех вакансий.
-    # print(hh.get_employers())  # Вывод работодателей по поиску.
+    # print(hh.get_employers(input()))  # Вывод работодателей по поиску.
