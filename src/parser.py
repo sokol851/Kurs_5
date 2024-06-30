@@ -2,30 +2,36 @@ import requests
 
 
 class HHParser:
+    """ Класс для работы с HeadHunter. """
     @staticmethod
-    def __get_request():
-        params = {'per_page': 10,
-                  'sort_by': 'by_vacancies_open'}
+    def __get_request(keyword) -> list[dict]:
+        """ Получение списка работодателей по ключевому слову. """
+        params = {'text': keyword, 'per_page': 10, 'sort_by': 'by_vacancies_open', 'only_with_vacancies': True}
         response = requests.get("https://api.hh.ru/employers", params=params)
         if response.status_code == 200:
             return response.json()['items']
 
-    def get_employers(self):
+    def get_employers(self, keyword=None) -> list[dict]:
+        """ Формирование списка работодателей для удобства. """
         employers = []
-        data = self.__get_request()
+        data = self.__get_request(keyword)
         for employer in data:
-            employers.append({'id': employer['id'], "name": employer['name']})
+            employers.append(
+                {'id': employer['id'], "name": employer['name'], 'count_vac': employer['open_vacancies'],
+                 'url': employer['alternate_url']})
         return employers
 
     @staticmethod
-    def __get_vacancies_on_employer(employer_id):
-        params = {'employer_id': employer_id}
+    def __get_vacancies_on_employer(employer_id) -> list[dict]:
+        """ Получение списка вакансий от работодателей полученных в get_employers. """
+        params = {'employer_id': employer_id, 'per_page': 100}
         response = requests.get('https://api.hh.ru/vacancies', params=params)
         if response.status_code == 200:
             return response.json()['items']
 
-    def get_all_vacancies(self):
-        employers = self.get_employers()
+    def get_all_vacancies(self, keyword=None) -> list[dict]:
+        """ Формирование списка вакансий для удобства. """
+        employers = self.get_employers(keyword)
         all_vacancies = []
         for employer in employers:
             vacancies = self.__get_vacancies_on_employer(employer['id'])
@@ -49,4 +55,5 @@ class HHParser:
 
 if __name__ == '__main__':
     hh = HHParser()
-    # print(hh.get_all_vacancies())
+    # print(hh.get_all_vacancies())  # Вывод всех вакансий.
+    # print(hh.get_employers())  # Вывод работодателей по поиску.
