@@ -31,8 +31,10 @@ class DBManager:
 
     def get_avg_salary(self) -> int:
         """ Получает среднюю зарплату по вакансиям. """
-        avg_salary = self.__execute_query('SELECT AVG(salary_from) FROM vacancies')
-        return round(*avg_salary[0])
+        avg_salary_from = self.__execute_query('SELECT AVG(salary_from) FROM vacancies where salary_from > 0')
+        avg_salary_to = self.__execute_query('SELECT AVG(salary_to) FROM vacancies where salary_to > 0')
+        avg_salary = round((round(*avg_salary_from[0]) + round(*avg_salary_to[0])) / 2)
+        return avg_salary
 
     def get_vacancies_with_higher_salary(self) -> list[set]:
         """ Получает список всех вакансий, у которых зарплата выше средней по всем вакансиям. """
@@ -63,11 +65,11 @@ class DBManager:
                     cur.execute(f'DELETE FROM vacancies WHERE id = {id_vac}')
         conn.close()
 
-
-if __name__ == "__main__":
-    db = DBManager('data_kurs')
-    # print(db.get_companies_and_vacancies_count())
-    # print(db.get_all_vacancies())
-    # print(db.get_avg_salary())
-    # print(db.get_vacancies_with_higher_salary())
-    # print(db.get_vacancies_with_keyword(input('Слово ввести')))
+    def clean_db(self):
+        """ Очищает базу, но не удаляет. """
+        conn = psycopg2.connect(dbname=self.__name, **config())
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(f'TRUNCATE TABLE vacancies CASCADE;'
+                            f'TRUNCATE TABLE employers CASCADE')
+        conn.close()

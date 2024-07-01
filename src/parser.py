@@ -3,10 +3,11 @@ import requests
 
 class HHParser:
     """ Класс для работы с HeadHunter. """
+
     @staticmethod
     def __get_request(keywords) -> list[dict]:
         """ Получение списка работодателей по ключевым словам или топ. """
-        keyword = keywords.replace(' ', '').lower().split(',')
+        keyword = keywords.replace(' ', '').split(',')
         list_list_vac = []
         for i in keyword:
             params = {'text': i, 'per_page': 10, 'sort_by': 'by_vacancies_open', 'only_with_vacancies': True}
@@ -60,9 +61,3 @@ class HHParser:
                                       'area': vacancy['area']['name']
                                       })
         return all_vacancies
-
-
-if __name__ == '__main__':
-    hh = HHParser()
-    # print(hh.get_all_vacancies())  # Вывод всех вакансий.
-    # print(hh.get_employers(input()))  # Вывод работодателей по поиску.
