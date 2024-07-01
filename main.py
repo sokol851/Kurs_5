@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from utils.utils import choice_menu
 
 if __name__ == '__main__':
